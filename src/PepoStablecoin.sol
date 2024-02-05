@@ -26,13 +26,13 @@ contract PepoStablecoin is ERC20, ERC20Permit, Ownable{
 
     function getEthPrice() public view returns (uint) {
         (, int price, , ,) = ethPriceFeed.latestRoundData();
-        return uint(price / 10**8 );
+        return uint(price / 10**8);
     }
 
     function borrow(uint ratio) public payable {
         require(ratio <= 75, "ratio must less than equal 75%");
 
-        uint collateral =  msg.value;
+        uint collateral = msg.value;
         uint debt = collateral / 10**18 * getEthPrice() * ratio / 100;
         debtCollateralRatios[msg.sender] = DebtCollateralRatio(
             debt,
@@ -45,8 +45,7 @@ contract PepoStablecoin is ERC20, ERC20Permit, Ownable{
     }
 
     function payBack(uint256 payBackAmount) public onlyOwner {
-        require(payBackAmount <= debtCollateralRatios[_msgSender()].debt, 
-        "the payBack amount must less than equal your dept");
+        require(payBackAmount <= debtCollateralRatios[_msgSender()].debt, "the payBack amount must less than equal your dept");
 
         _burn(_msgSender(), payBackAmount);
         debtCollateralRatios[_msgSender()].debt = debtCollateralRatios[_msgSender()].debt - payBackAmount;
@@ -86,9 +85,6 @@ contract PepoStablecoin is ERC20, ERC20Permit, Ownable{
     }
 
     function getRatio(address addr) public view returns (uint ratio) {
-        return (debtCollateralRatios[addr].debt * 100) / 
-        (debtCollateralRatios[addr].collateral / 10**18 * 
-        getEthPrice());
+        return (debtCollateralRatios[addr].debt * 100) / (debtCollateralRatios[addr].collateral / 10**18 * getEthPrice());
     }
-    
 }
