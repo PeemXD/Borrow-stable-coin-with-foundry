@@ -3,8 +3,7 @@ pragma solidity ^0.8.24;
 import "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
-// import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import "../test/MockAggregatorV3.sol";
+import "chainlink/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
 contract PepoStablecoin is ERC20, ERC20Permit, Ownable{
     struct DebtCollateralRatio {
@@ -22,16 +21,12 @@ contract PepoStablecoin is ERC20, ERC20Permit, Ownable{
 
 
     constructor(address ethUsd) ERC20("Pepo Stablecoin", "USDP") ERC20Permit("USDP") Ownable(_msgSender()) {
-        // Use MockAggregatorV3 for local development
-        // ethPriceFeed = AggregatorV3Interface(address(new MockAggregatorV3()));
         ethPriceFeed = AggregatorV3Interface(ethUsd);
-        // Use Real in ETH chain
-        // ethPriceFeed = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
     }
 
     function getEthPrice() public view returns (uint) {
         (, int price, , ,) = ethPriceFeed.latestRoundData();
-        return uint(price);
+        return uint(price / 10**8 );
     }
 
     function borrow(uint ratio) public payable {
