@@ -67,7 +67,9 @@ contract PepoStablecoinTest is Test {
 
         mockAggregator.setEthPrice(newEthPrice);
 
-        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, notOwnerAccount));
+        bytes memory ownableUnauthorizedAccount =
+            abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, notOwnerAccount);
+        vm.expectRevert(ownableUnauthorizedAccount);
         vm.prank(notOwnerAccount);
         pepoStablecoin.liquidate(borrowerAccount);
     }
