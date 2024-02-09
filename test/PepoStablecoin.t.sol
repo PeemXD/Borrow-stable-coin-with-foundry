@@ -56,6 +56,7 @@ contract PepoStablecoinTest is Test {
     }
 
     function test_RevertWhen_NotOwnerCallLiquidate() public payable {
+        // arrange
         uint256 ratio = 50;
         uint256 collateralAmount = 1 ether;
         int256 ethPrice = 2000;
@@ -64,9 +65,9 @@ contract PepoStablecoinTest is Test {
         address notOwnerAccount = vm.addr(2);
         mockAggregator.setEthPrice(ethPrice);
         pepoStablecoin.borrow{value: collateralAmount}(ratio);
-
         mockAggregator.setEthPrice(newEthPrice);
 
+        // act & assert
         bytes memory ownableUnauthorizedAccount =
             abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, notOwnerAccount);
         vm.expectRevert(ownableUnauthorizedAccount);
