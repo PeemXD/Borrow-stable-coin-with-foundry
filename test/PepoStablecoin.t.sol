@@ -11,8 +11,6 @@ contract PepoStablecoinTest is Test {
     PepoStablecoin private pepoStablecoin;
     MockAggregatorV3 private mockAggregator;
 
-    // error OwnableUnauthorizedAccount(address account);
-
     function setUp() public {
         mockAggregator = new MockAggregatorV3();
         pepoStablecoin = new PepoStablecoin(address(mockAggregator));
@@ -45,6 +43,41 @@ contract PepoStablecoinTest is Test {
         vm.stopPrank();
 
         uint256 expectedDebt = 1675;
+        assertEq(expectedDebt, actualDebt, "Debt does not match");
+    }
+
+    function test_BorrowWith1PercentRatio() public payable {
+        uint256 ratio = 1;
+        uint256 collateralAmount = 1 ether;
+        int256 ethPrice = 1000;
+        address borrower = vm.addr(1);
+        mockAggregator.setEthPrice(ethPrice);
+
+        hoax(borrower, 1 ether); // hoax is vm.deal and vm.prank
+        pepoStablecoin.borrow{value: collateralAmount}(ratio);
+        uint256 actualDebt = pepoStablecoin.getDebt(borrower);
+
+        uint256 expectedDebt = 10;
+        assertEq(expectedDebt, actualDebt, "Debt does not match");
+    }
+
+    // fuzz testing is random value of test parameter --> add parameter to test function
+    // use for make sure that the tests are not passing just because of that hardcoded value.
+    // recommend to use vm.prank and fuzz testing
+    function test_BorrowWith10PercentRatioAndRandowBorrower(address borrower) public payable {
+        assertEq(pepoStablecoin.getDebt(borrower), 0);
+        assertEq(pepoStablecoin.getCollateral(borrower), 0 ether);
+
+        uint256 ratio = 1;
+        uint256 collateralAmount = 1 ether;
+        int256 ethPrice = 1000;
+        mockAggregator.setEthPrice(ethPrice);
+
+        hoax(borrower, 1 ether); // hoax is vm.deal and vm.prank
+        pepoStablecoin.borrow{value: collateralAmount}(ratio);
+        uint256 actualDebt = pepoStablecoin.getDebt(borrower);
+
+        uint256 expectedDebt = 10;
         assertEq(expectedDebt, actualDebt, "Debt does not match");
     }
 
